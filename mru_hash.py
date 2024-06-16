@@ -1,20 +1,31 @@
 import hashlib
+import sys
 
-h = hashlib.sha1()
-h.update(b'mrCloud')
 
-l = 0
-with open( "c:\\path\\to\\big_file.txt", "rb" ) as f:
-    b = f.read( 1024*1024 )
-    while b:
-        h.update( b )
-        l += len(b)
+def calcHash(fname):
+    h = hashlib.sha1()
+    h.update(b'mrCloud')
 
-        b = f.read(1024 * 1024)
+    total = 0
+    with open(fname, "rb") as f:
+        data = f.read(1024 * 1024 * 10)
+        while data:
+            h.update(data)
+            total += len(data)
 
-print( "Len: " + str(l) )
-h.update( str.encode(str(l)) )
+            data = f.read(1024 * 1024 * 10)
 
-d = h.digest()
+    # print( "Len: " + str(l) )
+    h.update(str.encode(str(total)))
 
-print( d.hex().upper() )
+    return h.digest()
+
+
+if __name__ == "__main__":
+    if (len(sys.argv) == 1):
+        print('Program generates ETag like cloud.mail.ru service')
+        print('  can be useful in verifiying uploaded files')
+        print('Usage: python mru_hash.py file_name')
+        exit()
+
+    print(calcHash(sys.argv[1]).hex().upper())
